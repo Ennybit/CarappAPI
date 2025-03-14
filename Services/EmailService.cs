@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MimeKit.Text;
 using MimeKit;
 using MailKit.Net.Smtp;
+using WebApi.Models;
 
 namespace WebApi.Services
 {
@@ -22,17 +23,33 @@ namespace WebApi.Services
             email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
             email.Subject = mailRequest.Subject;
             email.Body = new TextPart(TextFormat.Html) { Text = mailRequest.Body };
-            /* var builder = new BodyBuilder();
-             builder.TextBody = mailRequest.Body;    
-             email.Body = builder.ToMessageBody();*/
+            
 
 
             using var smtp = new SmtpClient();
-            smtp.Connect(emailSettings.Host, emailSettings.Port, SecureSocketOptions.StartTls);
+            smtp.Connect(emailSettings.Host, emailSettings.Port, SecureSocketOptions.SslOnConnect);
             smtp.Authenticate(emailSettings.Email, emailSettings.Password);
             await smtp.SendAsync(email);
             smtp.Disconnect(true);
 
+        }
+
+        public async Task UserSendEmailAsync(ContactMe contactMe)
+        {
+            var email = new MimeMessage();
+            email.From.Add(new MailboxAddress(contactMe.Name, contactMe.Email));
+            email.To.Add(new MailboxAddress("Admin", emailSettings.Email));
+            email.ReplyTo.Add(new MailboxAddress(contactMe.Name, contactMe.Email));
+            email.Subject = contactMe.Subject;
+            email.Body = new TextPart(TextFormat.Html) { Text = contactMe.Body };
+
+
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(emailSettings.Host, emailSettings.Port, SecureSocketOptions.SslOnConnect);
+            smtp.Authenticate(emailSettings.Email, emailSettings.Password);
+            await smtp.SendAsync(email);
+            smtp.Disconnect(true);
         }
     }
 }

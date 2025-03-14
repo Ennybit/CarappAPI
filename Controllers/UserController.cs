@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 using MimeKit.Text;
+using WebApi.Models;
 using WebApi.Repositories;
 using WebApi.Services;
 
@@ -67,14 +68,21 @@ namespace CarAPI.Controllers
                 <p>We will get back to you soon!</p>
             </body>
             </html>";
-            if (body != null)
-            {
-                var mailrequest = new MailRequest() { ToEmail = repo.Email, Subject = "Car Inquiry", Body = emailBody };
-                await _emailservice.SendEmailAsync(mailrequest);
-            }
-            
+
+            var mailrequest = new MailRequest() { ToEmail = repo.Email, Subject = "Car Inquiry", Body = emailBody };
+            await _emailservice.SendEmailAsync(mailrequest);
+
 
             await context.SaveChangesAsync();
+            return Ok();
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Contactme(ContactMe contact)
+        {
+            var mailrequest = new ContactMe() { Email = contact.Email, Subject = contact.Subject, Body = contact.Body };
+            await _emailservice.UserSendEmailAsync(mailrequest);
             return Ok();
 
         }
