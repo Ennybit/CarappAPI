@@ -24,6 +24,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
+    builder.Configuration.AddUserSecrets<Program>();
     app.UseSwagger();
     app.UseSwaggerUI( c=>
     {
